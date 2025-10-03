@@ -4,13 +4,12 @@
     <property name="war.name" value="ch12_ex2_userAdmin.war"/>
     <property name="build.work.dir" value="build-docker"/>
     <property name="classes.dir" value="${build.work.dir}/classes"/>
-    <property name="servlet.api.jar" value="/usr/share/java/servlet-api-4.0.jar"/>
 
     <path id="compile.classpath">
         <fileset dir="build/web/WEB-INF/lib">
             <include name="**/*.jar"/>
         </fileset>
-        <pathelement location="${servlet.api.jar}"/>
+        <pathelement location="/tmp/servlet-api.jar"/>
     </path>
 
     <target name="clean">

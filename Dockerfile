@@ -6,8 +6,11 @@ FROM eclipse-temurin:17-jdk-jammy AS build
 ENV ANT_VERSION=1.10.15
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ant libservlet-api-java \
+    && apt-get install -y --no-install-recommends ant wget \
     && rm -rf /var/lib/apt/lists/*
+
+# Download servlet API jar since libservlet-api-java path is inconsistent
+RUN wget -O /tmp/servlet-api.jar https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/4.0.1/javax.servlet-api-4.0.1.jar
 
 WORKDIR /workspace
 
