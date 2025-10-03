@@ -14,8 +14,10 @@ public class ConnectionPool {
         try {
             InitialContext ic = new InitialContext();
             dataSource = (DataSource) ic.lookup("java:/comp/env/jdbc/murach");
+            System.out.println("DataSource lookup successful");
         } catch (NamingException e) {
-            System.out.println(e);
+            System.out.println("JNDI lookup failed: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -32,9 +34,12 @@ public class ConnectionPool {
                 System.out.println("DataSource is null - JNDI lookup may have failed");
                 return null;
             }
-            return dataSource.getConnection();
+            Connection conn = dataSource.getConnection();
+            System.out.println("Database connection obtained successfully");
+            return conn;
         } catch (SQLException e) {
-            System.out.println(e);
+            System.out.println("SQLException getting connection: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
