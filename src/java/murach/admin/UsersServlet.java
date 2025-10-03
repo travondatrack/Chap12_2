@@ -27,8 +27,10 @@ public class UsersServlet extends HttpServlet {
         
         // perform action and set URL to appropriate page
         if (action.equals("display_users")) {            
+            System.out.println("=== UsersServlet: display_users action ===");
             // get list of users
             ArrayList<User> users = UserDB.selectUsers();            
+            System.out.println("Found " + (users != null ? users.size() : 0) + " users");
             request.setAttribute("users", users);
         } 
         else if (action.equals("display_user")) {
