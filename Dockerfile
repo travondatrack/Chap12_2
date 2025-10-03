@@ -1,47 +1,39 @@
-# syntax=docker/dockerfile:1
+# Multi-stage build để tối ưu kích thước image
+FROM maven:3.9.4-eclipse-temurin-21 AS builder
 
-### Build stage ------------------------------------------------------------
-FROM eclipse-temurin:17-jdk-jammy AS build
+# Set working directory
+WORKDIR /app
 
-ENV ANT_VERSION=1.10.15
+# Copy pom.xml và download dependencies trước
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ant wget gettext-base \
-    && rm -rf /var/lib/apt/lists/*
-
-# Download servlet API jar since libservlet-api-java path is inconsistent
-RUN wget -O /tmp/servlet-api.jar https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/4.0.1/javax.servlet-api-4.0.1.jar
-
-WORKDIR /workspace
-
-COPY build.xml ./
-COPY docker-build.xml ./
-COPY nbproject ./nbproject
+# Copy source code và build
 COPY src ./src
-COPY web ./web
-COPY build ./build
-COPY create_user_table.sql ./
+RUN mvn clean package -DskipTests
 
-RUN ant -f docker-build.xml clean dist
+# Production stage với Tomcat
+FROM tomcat:10.1-jdk21-temurin
 
-### Runtime stage ----------------------------------------------------------
-FROM tomcat:9.0-jdk17-temurin
+# Remove default webapps
+RUN rm -rf /usr/local/tomcat/webapps/*
 
-ENV CATALINA_OPTS="-Djava.security.egd=file:/dev/./urandom"
+# Copy WAR file từ builder stage
+COPY --from=builder /app/target/Chap13_1-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
 
-# Allow connecting to the container port 8080
+# Tạo thư mục logs
+RUN mkdir -p /usr/local/tomcat/logs
+
+# Set environment variables
+ENV CATALINA_OPTS="-Djava.security.egd=file:/dev/./urandom -Xmx512m -Xms256m"
+ENV JAVA_OPTS="-Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"
+
+# Expose port
 EXPOSE 8080
 
-# Remove default applications and deploy our WAR as ROOT
-RUN rm -rf /usr/local/tomcat/webapps/*
-COPY --from=build /workspace/dist/ch12_ex2_userAdmin.war /usr/local/tomcat/webapps/ROOT.war
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8080/ || exit 1
 
-# Copy MySQL connector to Tomcat lib directory (for JDBC driver)
-COPY --from=build /workspace/build/web/WEB-INF/lib/mysql-connector-j-9.4.0.jar /usr/local/tomcat/lib/
-
-# Define placeholders for required database configuration.
-ENV DB_URL="jdbc:mysql://localhost:3306/murach?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
-    DB_USERNAME="root" \
-    DB_PASSWORD="change-me"
-
+# Start Tomcat
 CMD ["catalina.sh", "run"]
