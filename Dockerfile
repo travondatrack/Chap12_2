@@ -6,7 +6,7 @@ FROM eclipse-temurin:17-jdk-jammy AS build
 ENV ANT_VERSION=1.10.15
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ant wget \
+    && apt-get install -y --no-install-recommends ant wget gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
 # Download servlet API jar since libservlet-api-java path is inconsistent
@@ -36,9 +36,13 @@ EXPOSE 8080
 RUN rm -rf /usr/local/tomcat/webapps/*
 COPY --from=build /workspace/dist/ch12_ex2_userAdmin.war /usr/local/tomcat/webapps/ROOT.war
 
+# Copy the entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Define placeholders for required database configuration.
 ENV DB_URL="jdbc:mysql://localhost:3306/murach?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
     DB_USERNAME="root" \
     DB_PASSWORD="change-me"
 
-CMD ["catalina.sh", "run"]
+CMD ["/usr/local/bin/docker-entrypoint.sh"]

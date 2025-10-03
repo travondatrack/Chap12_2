@@ -1,9 +1,9 @@
 package murach.data;
 
 import java.sql.*;
-import javax.sql.DataSource;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 public class ConnectionPool {
 
@@ -28,6 +28,10 @@ public class ConnectionPool {
 
     public Connection getConnection() {
         try {
+            if (dataSource == null) {
+                System.out.println("DataSource is null - JNDI lookup may have failed");
+                return null;
+            }
             return dataSource.getConnection();
         } catch (SQLException e) {
             System.out.println(e);
@@ -37,7 +41,9 @@ public class ConnectionPool {
 
     public void freeConnection(Connection c) {
         try {
-            c.close();
+            if (c != null) {
+                c.close();
+            }
         } catch (SQLException e) {
             System.out.println(e);
         }

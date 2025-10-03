@@ -166,6 +166,12 @@ public class UserDB {
         PreparedStatement ps = null;
         ResultSet rs = null;
         
+        // Check if connection is null before using it
+        if (connection == null) {
+            System.out.println("Error: Could not get database connection");
+            return new ArrayList<User>(); // Return empty list instead of null
+        }
+        
         String query = "SELECT * FROM users";
         try {
             ps = connection.prepareStatement(query);
@@ -183,7 +189,7 @@ public class UserDB {
             return users;
         } catch (SQLException e) {
             System.out.println(e);
-            return null;
+            return new ArrayList<User>(); // Return empty list instead of null
         } finally {
             DBUtil.closeResultSet(rs);
             DBUtil.closePreparedStatement(ps);
