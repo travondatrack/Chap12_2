@@ -36,6 +36,9 @@ EXPOSE 8080
 RUN rm -rf /usr/local/tomcat/webapps/*
 COPY --from=build /workspace/dist/ch12_ex2_userAdmin.war /usr/local/tomcat/webapps/ROOT.war
 
+# Copy MySQL connector to Tomcat lib directory (for JDBC driver)
+COPY --from=build /workspace/build/web/WEB-INF/lib/mysql-connector-j-9.4.0.jar /usr/local/tomcat/lib/
+
 # Copy the entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh

@@ -8,7 +8,16 @@ echo "DB_URL: $DB_URL"
 echo "DB_USERNAME: $DB_USERNAME" 
 echo "DB_PASSWORD: [HIDDEN]"
 
+# Wait for WAR to be extracted
+sleep 10
+
 CONTEXT_FILE="/usr/local/tomcat/webapps/ROOT/META-INF/context.xml"
+
+# Wait for context.xml to be available
+while [ ! -f "$CONTEXT_FILE" ]; do
+    echo "Waiting for WAR extraction and context.xml..."
+    sleep 2
+done
 
 if [ -f "$CONTEXT_FILE" ]; then
     echo "=== Original context.xml ==="
