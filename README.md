@@ -32,7 +32,7 @@ Once the container starts, the app is available at <http://localhost:8080/>.
 2. Push to a Git provider (GitHub/GitLab/Bitbucket) connected to Render.
 3. In the Render dashboard, choose **New > Blueprint** and select the repo. Render will pick up `render.yaml` and create a Docker web service.
 4. In the service settings, add environment variables `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. Render stores them securely and injects them into the container during deploys.
-5. Deploy. The service will build the Ant project inside the Docker image and publish the WAR to Tomcat automatically.
+5. Deploy. The service will build the Ant project inside the Docker image (via `docker-build.xml`, a NetBeans-independent Ant script) and publish the WAR to Tomcat automatically.
 
 ## Notes
 

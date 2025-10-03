@@ -6,19 +6,20 @@ FROM eclipse-temurin:17-jdk-jammy AS build
 ENV ANT_VERSION=1.10.15
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ant \
+    && apt-get install -y --no-install-recommends ant libservlet-api-java \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /workspace
 
 COPY build.xml ./
+COPY docker-build.xml ./
 COPY nbproject ./nbproject
 COPY src ./src
 COPY web ./web
 COPY build ./build
 COPY create_user_table.sql ./
 
-RUN ant clean dist
+RUN ant -f docker-build.xml clean dist
 
 ### Runtime stage ----------------------------------------------------------
 FROM tomcat:9.0-jdk17-temurin
