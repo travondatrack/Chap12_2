@@ -39,9 +39,25 @@ COPY --from=build /workspace/dist/ch12_ex2_userAdmin.war /usr/local/tomcat/webap
 # Copy MySQL connector to Tomcat lib directory (for JDBC driver)
 COPY --from=build /workspace/build/web/WEB-INF/lib/mysql-connector-j-9.4.0.jar /usr/local/tomcat/lib/
 
-# Define placeholders for required database configuration.
-ENV DB_URL="jdbc:mysql://localhost:3306/murach?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=UTC" \
-    DB_USERNAME="root" \
-    DB_PASSWORD="change-me"
+# Create context.xml with hardcoded database info for Render
+RUN mkdir -p /usr/local/tomcat/conf/Catalina/localhost
+COPY <<EOF /usr/local/tomcat/conf/Catalina/localhost/ROOT.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+  <Resource auth="Container" 
+            driverClassName="com.mysql.cj.jdbc.Driver" 
+            logAbandoned="true" 
+            maxActive="100" 
+            maxIdle="30" 
+            maxWait="10000" 
+            name="jdbc/murach" 
+            password="Spk61392005@" 
+            removeAbandoned="true" 
+            removeAbandonedTimeout="60" 
+            type="javax.sql.DataSource" 
+            url="jdbc:mysql://34.9.114.182:3306/murach?useSSL=true&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC" 
+            username="root"/>
+</Context>
+EOF
 
 CMD ["catalina.sh", "run"]
